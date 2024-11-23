@@ -12,7 +12,6 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password, userType } = req.body;
 
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -23,7 +22,6 @@ export const signup = async (req, res) => {
       userType,
     });
 
-    // Remove password from the response
     newUser.password = undefined;
 
     const token = signToken(newUser._id);
@@ -47,7 +45,6 @@ export const signin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if email and password exist
     if (!email || !password) {
       return res.status(400).json({
         status: "fail",
@@ -55,8 +52,7 @@ export const signin = async (req, res) => {
       });
     }
 
-    // Check if user exists && password is correct
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({
@@ -65,16 +61,70 @@ export const signin = async (req, res) => {
       });
     }
 
-    // If everything ok, send token to client
     const token = signToken(user._id);
+
+    // Remove password from the response
+    user.password = undefined;
+
     res.status(200).json({
       status: "success",
       token,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          userType: user.userType,
+        },
+      },
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
       message: error.message,
+    });
+  }
+};
+
+export const logout = (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.status(200).json({
+      status: "success",
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      message: "An error occurred during logout",
+    });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          userType: user.userType,
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      message: "An error occurred while fetching user data",
     });
   }
 };
