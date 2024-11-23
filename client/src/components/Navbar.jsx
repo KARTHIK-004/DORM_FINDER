@@ -162,7 +162,7 @@ export function Navbar() {
   );
 
   return (
-    <div className="border-b">
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-4">
         <Sheet>
           <SheetTrigger asChild>
@@ -281,7 +281,11 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <Button asChild variant="ghost" className="hidden sm:inline-flex">
+              <Button
+                asChild
+                variant="outline"
+                className="hidden sm:inline-flex"
+              >
                 <Link to="/sign-in">Sign In</Link>
               </Button>
               <Button asChild className="hidden sm:inline-flex">
