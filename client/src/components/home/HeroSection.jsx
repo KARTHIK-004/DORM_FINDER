@@ -12,23 +12,24 @@ import { MapPin, Search } from "lucide-react";
 export function HeroSection() {
   return (
     <section className="relative py-24 bg-background">
-      <div className="mx-auto px-4 md:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="max-w-xl">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
               Find Your Perfect Hostel Stay
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Discover affordable and comfortable hostels worldwide for your
-              next adventure
+              Discover and book the best student accommodations near your
+              university. Verified listings, seamless booking, and trusted by
+              thousands of students.
             </p>
             <div className="bg-card rounded-lg shadow-lg p-6">
               <form className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="Where are you going?"
+                      placeholder="Search by university, city, or hostel name..."
                       className="pl-10"
                     />
                   </div>
@@ -50,9 +51,9 @@ export function HeroSection() {
               </form>
             </div>
           </div>
-          <div className="hidden lg:block relative h-[450px] rounded-lg overflow-hidden">
+          <div className="hidden lg:block relative h-[500px] rounded-lg overflow-hidden">
             <img
-              src="/Room.png"
+              src="/Room4.png"
               alt="Cozy hostel interior"
               className="rounded-lg shadow-lg h-full w-full object-cover"
             />

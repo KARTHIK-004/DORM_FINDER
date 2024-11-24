@@ -158,12 +158,22 @@ export function Navbar() {
           Contact
         </Link>
       </NavigationMenuItem>
+      {isAuthenticated && user && (
+        <NavigationMenuItem>
+          <Link
+            to={`/dashboard/${user.userType}`}
+            className={navigationMenuTriggerStyle()}
+          >
+            Dashboard
+          </Link>
+        </NavigationMenuItem>
+      )}
     </>
   );
 
   return (
     <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-4">
+      <div className="max-w-7xl mx-auto flex h-16 items-center px-4">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="lg:hidden">
@@ -195,6 +205,14 @@ export function Navbar() {
               <Link to="/contact" className="text-sm font-medium">
                 Contact
               </Link>
+              {isAuthenticated && user && (
+                <Link
+                  to={`/dashboard/${user.userType}`}
+                  className="text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+              )}
             </nav>
           </SheetContent>
         </Sheet>
@@ -242,16 +260,14 @@ export function Navbar() {
                   <Link to="/profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
+                  <Link to={`/dashboard/${user.userType}`}>Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Link to="/favorites">Favorites</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link to="/bookings">My Bookings</Link>
                 </DropdownMenuItem>
-                {user.userType === "agent" && (
-                  <DropdownMenuItem>
-                    <Link to="/my-listings">My Listings</Link>
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -281,11 +297,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <Button
-                asChild
-                variant="outline"
-                className="hidden sm:inline-flex"
-              >
+              <Button asChild variant="ghost" className="hidden sm:inline-flex">
                 <Link to="/sign-in">Sign In</Link>
               </Button>
               <Button asChild className="hidden sm:inline-flex">

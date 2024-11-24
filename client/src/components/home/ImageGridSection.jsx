@@ -21,18 +21,18 @@ export function ImageGridSection() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <img
-              src="/placeholder.svg?height=300&width=300"
+              src="/Room5.png"
               alt="Property"
               className="w-full h-[300px] object-cover rounded-lg"
             />
             <div className="grid gap-4">
               <img
-                src="/placeholder.svg?height=140&width=300"
+                src="/Room6.png"
                 alt="Meeting"
                 className="w-full h-[140px] object-cover rounded-lg"
               />
               <img
-                src="/placeholder.svg?height=140&width=300"
+                src="/Room1.png"
                 alt="Interior"
                 className="w-full h-[140px] object-cover rounded-lg"
               />
