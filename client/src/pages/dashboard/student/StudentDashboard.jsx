@@ -1,49 +1,40 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Search, Heart, Calendar, MessageSquare, Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
-import { ModeToggle } from "@/components/theme/ModeToggle";
+import { Outlet } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 export default function StudentDashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const stats = {
-    savedListings: 8,
-    upcomingViewings: 2,
-    activeBookings: 1,
-    unreadMessages: 3,
-  };
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
         userRole="student"
         isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
-      <div className="flex-1 flex flex-col">
-        <header className=" border-b px-4 py-2 flex items-center justify-between md:justify-end sticky top-0 z-30 h-16">
+
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "md:ml-64" : "md:ml-20"
+        }`}
+      >
+        <header className="h-16 border-b flex items-center px-4">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             className="md:hidden"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
-            <Menu className="h-[1.2rem] w-[1.2rem]" />
-            <span className="sr-only">Toggle Menu</span>
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle Sidebar</span>
           </Button>
-          <ModeToggle />
+          <h1 className="text-xl font-semibold ml-4">Student Dashboard</h1>
         </header>
-        <main className="flex-1 overflow-auto p-6">
-          <div className="max-w-7xl mx-auto"></div>
+
+        <main className="flex-1 overflow-y-auto p-4">
+          <Outlet />
         </main>
       </div>
     </div>
