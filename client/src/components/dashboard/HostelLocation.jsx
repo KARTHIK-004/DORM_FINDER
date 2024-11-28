@@ -1,25 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const PropertyLocation = ({ updateFormData, formData }) => {
+const HostelLocation = ({ updateFormData, formData }) => {
   const [localFormData, setLocalFormData] = useState({
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "",
-    ...formData,
+    address: formData.address || "",
+    city: formData.city || "",
+    state: formData.state || "",
+    zipCode: formData.zipCode || "",
+    country: formData.country || "",
   });
-
-  useEffect(() => {
-    updateFormData(localFormData);
-  }, [localFormData, updateFormData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLocalFormData((prev) => ({ ...prev, [name]: value }));
+    setLocalFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  // Use useMemo to memoize the update effect
+  useMemo(() => {
+    const timer = setTimeout(() => {
+      updateFormData(localFormData);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localFormData, updateFormData]);
 
   return (
     <div className="space-y-6">
@@ -95,4 +102,4 @@ const PropertyLocation = ({ updateFormData, formData }) => {
   );
 };
 
-export default PropertyLocation;
+export default HostelLocation;

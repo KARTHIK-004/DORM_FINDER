@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
 import userRoutes from "./routes/user.route.js";
+import listingRoutes from "./routes/listing.route.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/listings", listingRoutes);
 
 // Database connection
 mongoose

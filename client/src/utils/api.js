@@ -62,27 +62,27 @@ export const getMe = async () => {
   }
 };
 
-export const updateProfile = async (userData) => {
-  try {
-    const response = await api.put(`/users/update`, userData);
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : error.message;
-  }
-};
-
-export const getListings = async (params) => {
-  try {
-    const response = await api.get(`/listings`, { params });
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : error.message;
-  }
-};
-
 export const createListing = async (listingData) => {
   try {
-    const response = await api.post(`/listings`, listingData);
+    const response = await api.post("/listings", listingData);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+export const getListings = async () => {
+  try {
+    const response = await api.get("/listings");
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+export const getListing = async (id) => {
+  try {
+    const response = await api.get(`/listings/${id}`);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -91,7 +91,7 @@ export const createListing = async (listingData) => {
 
 export const updateListing = async (id, listingData) => {
   try {
-    const response = await api.put(`/listings/${id}`, listingData);
+    const response = await api.patch(`/listings/${id}`, listingData);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;

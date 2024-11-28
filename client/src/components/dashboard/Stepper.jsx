@@ -1,31 +1,47 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
-import PropertyInformationForm from "./PropertyInformationForm";
-import PropertyDetailsForm from "./PropertyDetailsForm";
-import Amenities from "./Amenities";
-import PropertyGallery from "./PropertyGallery";
-import FloorPlan from "./FloorPlan";
-import PropertyLocation from "./PropertyLocation";
-import Description from "./Description";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import NearByLocations from "./NearByLocations";
+import HostelLocation from "./HostelLocation";
+import HostelDescription from "./HostelDescription";
+import HostelGallery from "./HostelGallery";
+import HostelAmenities from "./HostelAmenities";
+import HostelDetailsForm from "./HostelDetailsForm";
+import HostelInformationForm from "./HostelInformationForm";
+import { createListing } from "@/utils/api";
 
 const Stepper = ({ initialStep = 1 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Handle form submission here
-      console.log("Form submitted:", formData);
-      toast({
-        title: "Property Listing Completed",
-        description: "Your property has been successfully listed.",
-      });
+      // Handle form submission
+      setIsSubmitting(true);
+      try {
+        const response = await createListing(formData);
+        console.log("Listing created:", response);
+        toast({
+          title: "Property Listing Completed",
+          description: "Your property has been successfully listed.",
+        });
+      } catch (error) {
+        console.error("Error creating listing:", error);
+        toast({
+          title: "Error",
+          description:
+            "There was an error creating your listing. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -42,9 +58,9 @@ const Stepper = ({ initialStep = 1 }) => {
   const steps = [
     {
       id: 1,
-      label: "Property Information",
+      label: "Hostel Information",
       component: (
-        <PropertyInformationForm
+        <HostelInformationForm
           updateFormData={updateFormData}
           formData={formData}
         />
@@ -52,9 +68,9 @@ const Stepper = ({ initialStep = 1 }) => {
     },
     {
       id: 2,
-      label: "Property Details",
+      label: "Hostel Details",
       component: (
-        <PropertyDetailsForm
+        <HostelDetailsForm
           updateFormData={updateFormData}
           formData={formData}
         />
@@ -64,35 +80,38 @@ const Stepper = ({ initialStep = 1 }) => {
       id: 3,
       label: "Amenities",
       component: (
-        <Amenities updateFormData={updateFormData} formData={formData} />
+        <HostelAmenities updateFormData={updateFormData} formData={formData} />
       ),
     },
     {
       id: 4,
-      label: "Property Gallery",
+      label: "Hostel Gallery",
       component: (
-        <PropertyGallery updateFormData={updateFormData} formData={formData} />
+        <HostelGallery updateFormData={updateFormData} formData={formData} />
       ),
     },
     {
       id: 5,
-      label: "Floor Plan",
+      label: "Description",
       component: (
-        <FloorPlan updateFormData={updateFormData} formData={formData} />
+        <HostelDescription
+          updateFormData={updateFormData}
+          formData={formData}
+        />
       ),
     },
     {
       id: 6,
-      label: "Description",
+      label: "Location",
       component: (
-        <Description updateFormData={updateFormData} formData={formData} />
+        <HostelLocation updateFormData={updateFormData} formData={formData} />
       ),
     },
     {
       id: 7,
-      label: "Location",
+      label: "Near By",
       component: (
-        <PropertyLocation updateFormData={updateFormData} formData={formData} />
+        <NearByLocations updateFormData={updateFormData} formData={formData} />
       ),
     },
   ];
@@ -167,13 +186,17 @@ const Stepper = ({ initialStep = 1 }) => {
       <div className="flex justify-between mt-8">
         <Button
           onClick={handlePrevious}
-          disabled={currentStep === 1}
+          disabled={currentStep === 1 || isSubmitting}
           variant="outline"
         >
           Previous
         </Button>
-        <Button onClick={handleNext}>
-          {currentStep === steps.length ? "Complete" : "Next"}
+        <Button onClick={handleNext} disabled={isSubmitting}>
+          {currentStep === steps.length
+            ? isSubmitting
+              ? "Submitting..."
+              : "Complete"
+            : "Next"}
         </Button>
       </div>
     </div>

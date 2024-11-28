@@ -122,7 +122,7 @@ export default function Sidebar({ userRole, isOpen, onToggle }) {
           {
             name: "Add New Hostel",
             icon: FilePlus,
-            path: "/agent/dashboard/add-hostel",
+            path: "/agent/dashboard/create-listings",
           },
           {
             name: "Manage Listings",

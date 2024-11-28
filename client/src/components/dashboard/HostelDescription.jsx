@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-const Description = ({ updateFormData, formData }) => {
+const HostelDescription = ({ updateFormData, formData }) => {
   const [description, setDescription] = useState(formData.description || "");
 
   useEffect(() => {
-    updateFormData({ description });
-  }, [description, updateFormData]);
+    if (description !== formData.description) {
+      updateFormData({ description });
+    }
+  }, [description, formData.description, updateFormData]);
 
   const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
@@ -30,4 +32,4 @@ const Description = ({ updateFormData, formData }) => {
   );
 };
 
-export default Description;
+export default HostelDescription;
