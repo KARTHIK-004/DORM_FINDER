@@ -1,18 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { MapPin, Plus, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const NearByLocations = ({ updateFormData, formData }) => {
+const NearByLocations = ({ updateFormData, formData, errors, clearError }) => {
   const [locations, setLocations] = useState(formData.nearbyLocations || []);
   const [newLocation, setNewLocation] = useState({ name: "", distance: "" });
-
-  useEffect(() => {
-    if (locations !== formData.nearbyLocations) {
-      updateFormData({ nearbyLocations: locations });
-    }
-  }, [locations, formData.nearbyLocations, updateFormData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,13 +16,18 @@ const NearByLocations = ({ updateFormData, formData }) => {
 
   const addLocation = () => {
     if (newLocation.name && newLocation.distance) {
-      setLocations((prev) => [...prev, newLocation]);
+      const updatedLocations = [...locations, newLocation];
+      setLocations(updatedLocations);
+      updateFormData({ nearbyLocations: updatedLocations });
       setNewLocation({ name: "", distance: "" });
+      clearError("nearbyLocations");
     }
   };
 
   const removeLocation = (index) => {
-    setLocations((prev) => prev.filter((_, i) => i !== index));
+    const updatedLocations = locations.filter((_, i) => i !== index);
+    setLocations(updatedLocations);
+    updateFormData({ nearbyLocations: updatedLocations });
   };
 
   return (
@@ -36,6 +36,7 @@ const NearByLocations = ({ updateFormData, formData }) => {
       <div>
         <p className="text-muted-foreground mb-6">
           Add points of interest near your hostel to attract potential guests.
+          Please add at least 2 nearby locations.
         </p>
 
         <div className="space-y-4 mb-6">
@@ -92,6 +93,16 @@ const NearByLocations = ({ updateFormData, formData }) => {
             </div>
           ))}
         </div>
+
+        {(locations.length < 2 || errors.nearbyLocations) && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>
+              {locations.length < 2
+                ? "Please add at least 2 nearby locations"
+                : errors.nearbyLocations}
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </div>
   );

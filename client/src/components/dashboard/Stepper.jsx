@@ -15,17 +15,107 @@ import { createListing } from "@/utils/api";
 const Stepper = ({ initialStep = 1 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const clearError = (fieldName) => {
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
+  };
+
+  const validateStep = (stepData, stepId) => {
+    const newErrors = {};
+
+    if (stepId === "hostelInfo") {
+      const requiredFields = [
+        "propertyName",
+        "propertyType",
+        "roomType",
+        "genderPolicy",
+        "pricingPeriod",
+        "price",
+        "capacity",
+      ];
+      requiredFields.forEach((field) => {
+        if (!stepData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+    } else if (stepId === "hostelDetails") {
+      const requiredFields = [
+        "hostelId",
+        "totalBeds",
+        "bedType",
+        "totalRooms",
+        "floors",
+        "bathroomsPerFloor",
+        "commonAreaSize",
+        "availableFrom",
+        "yearEstablished",
+      ];
+      requiredFields.forEach((field) => {
+        if (!stepData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+    } else if (stepId === "amenities") {
+      if (!stepData.amenities || stepData.amenities.length < 3) {
+        newErrors.amenities = "Please select at least 3 amenities";
+      }
+    } else if (stepId === "description") {
+      if (
+        !stepData.description ||
+        stepData.description.trim().split(/\s+/).length < 50
+      ) {
+        newErrors.description = "Description must be at least 50 words";
+      }
+    } else if (stepId === "location") {
+      const requiredFields = ["address", "city", "state", "country", "zipCode"];
+      requiredFields.forEach((field) => {
+        if (!stepData[field]) {
+          newErrors[field] = "This field is required";
+        }
+      });
+    } else if (stepId === "nearBy") {
+      if (!stepData.nearbyLocations || stepData.nearbyLocations.length < 2) {
+        newErrors.nearbyLocations = "Please add at least 2 nearby locations";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleNext = async () => {
-    if (currentStep < 7) {
+    const currentStepData = formData[steps[currentStep - 1].id] || {};
+    if (!validateStep(currentStepData, steps[currentStep - 1].id)) {
+      toast({
+        title: "Incomplete Form",
+        description: "Please fill in all required fields before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
       // Handle form submission
       setIsSubmitting(true);
       try {
-        const response = await createListing(formData);
+        const listingData = {
+          ...formData.hostelInfo,
+          ...formData.hostelDetails,
+          amenities: formData.amenities?.amenities || [],
+          description: formData.description?.description || "",
+          ...formData.location,
+          nearbyLocations: formData.nearBy?.nearbyLocations || [],
+        };
+        const response = await createListing(listingData);
         console.log("Listing created:", response);
         toast({
           title: "Property Listing Completed",
@@ -51,67 +141,96 @@ const Stepper = ({ initialStep = 1 }) => {
     }
   };
 
-  const updateFormData = (stepData) => {
-    setFormData((prevData) => ({ ...prevData, ...stepData }));
+  const updateFormData = (stepId, stepData) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [stepId]: { ...prevData[stepId], ...stepData },
+    }));
   };
 
   const steps = [
     {
-      id: 1,
+      id: "hostelInfo",
       label: "Hostel Information",
       component: (
         <HostelInformationForm
-          updateFormData={updateFormData}
-          formData={formData}
+          updateFormData={(data) => updateFormData("hostelInfo", data)}
+          formData={formData.hostelInfo || {}}
+          errors={errors}
+          clearError={clearError}
         />
       ),
     },
     {
-      id: 2,
+      id: "hostelDetails",
       label: "Hostel Details",
       component: (
         <HostelDetailsForm
-          updateFormData={updateFormData}
-          formData={formData}
+          updateFormData={(data) => updateFormData("hostelDetails", data)}
+          formData={formData.hostelDetails || {}}
+          errors={errors}
+          clearError={clearError}
         />
       ),
     },
     {
-      id: 3,
+      id: "amenities",
       label: "Amenities",
       component: (
-        <HostelAmenities updateFormData={updateFormData} formData={formData} />
+        <HostelAmenities
+          updateFormData={(data) => updateFormData("amenities", data)}
+          formData={formData.amenities || {}}
+          errors={errors}
+          clearError={clearError}
+        />
       ),
     },
     {
-      id: 4,
+      id: "gallery",
       label: "Hostel Gallery",
       component: (
-        <HostelGallery updateFormData={updateFormData} formData={formData} />
+        <HostelGallery
+          updateFormData={(data) => updateFormData("gallery", data)}
+          formData={formData.gallery || {}}
+          errors={errors}
+          clearError={clearError}
+        />
       ),
     },
     {
-      id: 5,
+      id: "description",
       label: "Description",
       component: (
         <HostelDescription
-          updateFormData={updateFormData}
-          formData={formData}
+          updateFormData={(data) => updateFormData("description", data)}
+          formData={formData.description || {}}
+          errors={errors}
+          clearError={clearError}
         />
       ),
     },
     {
-      id: 6,
+      id: "location",
       label: "Location",
       component: (
-        <HostelLocation updateFormData={updateFormData} formData={formData} />
+        <HostelLocation
+          updateFormData={(data) => updateFormData("location", data)}
+          formData={formData.location || {}}
+          errors={errors}
+          clearError={clearError}
+        />
       ),
     },
     {
-      id: 7,
+      id: "nearBy",
       label: "Near By",
       component: (
-        <NearByLocations updateFormData={updateFormData} formData={formData} />
+        <NearByLocations
+          updateFormData={(data) => updateFormData("nearBy", data)}
+          formData={formData.nearBy || {}}
+          errors={errors}
+          clearError={clearError}
+        />
       ),
     },
   ];
@@ -129,15 +248,15 @@ const Stepper = ({ initialStep = 1 }) => {
         />
 
         {/* Steps */}
-        {steps.map((step) => {
-          const isCompleted = step.id < currentStep;
-          const isCurrent = step.id === currentStep;
+        {steps.map((step, index) => {
+          const isCompleted = index + 1 < currentStep;
+          const isCurrent = index + 1 === currentStep;
 
           return (
             <div
               key={step.id}
               className="relative flex flex-col items-center w-full sm:w-auto sm:flex-1 mb-4 sm:mb-0 cursor-pointer"
-              onClick={() => setCurrentStep(step.id)}
+              onClick={() => setCurrentStep(index + 1)}
             >
               <div
                 className={cn(
@@ -158,7 +277,7 @@ const Stepper = ({ initialStep = 1 }) => {
                       !isCurrent && "text-muted-foreground"
                     )}
                   >
-                    {step.id}
+                    {index + 1}
                   </span>
                 )}
               </div>

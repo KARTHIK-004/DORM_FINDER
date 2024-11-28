@@ -9,18 +9,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const HostelDetailsForm = ({ updateFormData, formData }) => {
+const HostelDetailsForm = ({
+  updateFormData,
+  formData,
+  errors,
+  clearError,
+}) => {
   const [localFormData, setLocalFormData] = useState({
     hostelId: "",
-    pricePerNight: "",
+    pricePerNight: "0",
     totalBeds: "",
     bedType: "",
     totalRooms: "",
-    bathroomsPerFloor: "",
+    bathroomsPerFloor: "0",
     floors: "",
-    commonAreaSize: "",
-    availableFrom: "",
-    yearEstablished: "",
+    commonAreaSize: "0",
+    availableFrom: new Date().toISOString().split("T")[0],
+    yearEstablished: `${new Date().getFullYear()}`,
     ...formData,
   });
 
@@ -31,10 +36,12 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setLocalFormData((prev) => ({ ...prev, [name]: value }));
+    clearError(name);
   };
 
   const handleSelectChange = (name, value) => {
     setLocalFormData((prev) => ({ ...prev, [name]: value }));
+    clearError(name);
   };
 
   return (
@@ -52,8 +59,13 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="hostelId"
             value={localFormData.hostelId}
             onChange={handleInputChange}
+            onFocus={() => clearError("hostelId")}
             placeholder="Enter Hostel ID"
+            className={errors.hostelId ? "border-red-500" : ""}
           />
+          {errors.hostelId && (
+            <p className="text-red-500 text-sm mt-1">{errors.hostelId}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="floors">Number of Floors</Label>
@@ -62,9 +74,14 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="floors"
             value={localFormData.floors}
             onChange={handleInputChange}
+            onFocus={() => clearError("floors")}
             placeholder="Enter number of floors"
             type="number"
+            className={errors.floors ? "border-red-500" : ""}
           />
+          {errors.floors && (
+            <p className="text-red-500 text-sm mt-1">{errors.floors}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="totalBeds">Total Beds</Label>
@@ -73,9 +90,14 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="totalBeds"
             value={localFormData.totalBeds}
             onChange={handleInputChange}
+            onFocus={() => clearError("totalBeds")}
             placeholder="Enter total beds"
             type="number"
+            className={errors.totalBeds ? "border-red-500" : ""}
           />
+          {errors.totalBeds && (
+            <p className="text-red-500 text-sm mt-1">{errors.totalBeds}</p>
+          )}
         </div>
       </div>
 
@@ -84,9 +106,15 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
           <Label htmlFor="bedType">Bed Type</Label>
           <Select
             value={localFormData.bedType}
-            onValueChange={(value) => handleSelectChange("bedType", value)}
+            onValueChange={(value) => {
+              handleSelectChange("bedType", value);
+              clearError("bedType");
+            }}
           >
-            <SelectTrigger id="bedType">
+            <SelectTrigger
+              id="bedType"
+              className={errors.bedType ? "border-red-500" : ""}
+            >
               <SelectValue placeholder="Select bed type" />
             </SelectTrigger>
             <SelectContent>
@@ -95,6 +123,9 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
               <SelectItem value="mixed">Mixed (Single & Bunk)</SelectItem>
             </SelectContent>
           </Select>
+          {errors.bedType && (
+            <p className="text-red-500 text-sm mt-1">{errors.bedType}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="totalRooms">Total Rooms</Label>
@@ -103,9 +134,14 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="totalRooms"
             value={localFormData.totalRooms}
             onChange={handleInputChange}
+            onFocus={() => clearError("totalRooms")}
             placeholder="Enter total rooms"
             type="number"
+            className={errors.totalRooms ? "border-red-500" : ""}
           />
+          {errors.totalRooms && (
+            <p className="text-red-500 text-sm mt-1">{errors.totalRooms}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="bathroomsPerFloor">Bathrooms per Floor</Label>
@@ -114,9 +150,16 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="bathroomsPerFloor"
             value={localFormData.bathroomsPerFloor}
             onChange={handleInputChange}
+            onFocus={() => clearError("bathroomsPerFloor")}
             placeholder="Enter number of bathrooms"
             type="number"
+            className={errors.bathroomsPerFloor ? "border-red-500" : ""}
           />
+          {errors.bathroomsPerFloor && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.bathroomsPerFloor}
+            </p>
+          )}
         </div>
       </div>
 
@@ -128,9 +171,14 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="commonAreaSize"
             value={localFormData.commonAreaSize}
             onChange={handleInputChange}
+            onFocus={() => clearError("commonAreaSize")}
             placeholder="Enter size in sqft"
             type="number"
+            className={errors.commonAreaSize ? "border-red-500" : ""}
           />
+          {errors.commonAreaSize && (
+            <p className="text-red-500 text-sm mt-1">{errors.commonAreaSize}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="availableFrom">Available From</Label>
@@ -139,18 +187,27 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
             name="availableFrom"
             value={localFormData.availableFrom}
             onChange={handleInputChange}
+            onFocus={() => clearError("availableFrom")}
             type="date"
+            className={errors.availableFrom ? "border-red-500" : ""}
           />
+          {errors.availableFrom && (
+            <p className="text-red-500 text-sm mt-1">{errors.availableFrom}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="yearEstablished">Year Established</Label>
           <Select
             value={localFormData.yearEstablished}
-            onValueChange={(value) =>
-              handleSelectChange("yearEstablished", value)
-            }
+            onValueChange={(value) => {
+              handleSelectChange("yearEstablished", value);
+              clearError("yearEstablished");
+            }}
           >
-            <SelectTrigger id="yearEstablished">
+            <SelectTrigger
+              id="yearEstablished"
+              className={errors.yearEstablished ? "border-red-500" : ""}
+            >
               <SelectValue placeholder="Select Year" />
             </SelectTrigger>
             <SelectContent>
@@ -161,6 +218,11 @@ const HostelDetailsForm = ({ updateFormData, formData }) => {
               ))}
             </SelectContent>
           </Select>
+          {errors.yearEstablished && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.yearEstablished}
+            </p>
+          )}
         </div>
       </div>
     </div>
