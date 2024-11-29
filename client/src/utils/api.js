@@ -62,6 +62,19 @@ export const getMe = async () => {
   }
 };
 
+export const uploadImages = async (formData) => {
+  try {
+    const response = await api.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
 export const createListing = async (listingData) => {
   try {
     const response = await api.post("/listings", listingData);

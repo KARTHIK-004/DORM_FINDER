@@ -123,6 +123,11 @@ const listingSchema = new mongoose.Schema(
     },
     images: {
       type: [String],
+      required: true,
+      validate: [
+        arrayLimit,
+        "{PATH} must have at least 3 and no more than 7 items",
+      ],
     },
     description: {
       type: String,
@@ -165,6 +170,10 @@ const listingSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+function arrayLimit(val) {
+  return val.length >= 3 && val.length <= 7;
+}
 
 const Listing = mongoose.model("Listing", listingSchema);
 

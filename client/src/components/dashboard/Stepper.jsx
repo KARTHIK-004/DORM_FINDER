@@ -104,13 +104,13 @@ const Stepper = ({ initialStep = 1 }) => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Handle form submission
       setIsSubmitting(true);
       try {
         const listingData = {
           ...formData.hostelInfo,
           ...formData.hostelDetails,
           amenities: formData.amenities?.amenities || [],
+          images: formData.gallery?.images || [],
           description: formData.description?.description || "",
           ...formData.location,
           nearbyLocations: formData.nearBy?.nearbyLocations || [],
