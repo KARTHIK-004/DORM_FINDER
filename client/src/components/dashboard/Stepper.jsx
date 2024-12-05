@@ -74,12 +74,37 @@ const Stepper = ({ initialStep = 1 }) => {
         newErrors.description = "Description must be at least 50 words";
       }
     } else if (stepId === "location") {
-      const requiredFields = ["address", "city", "state", "country", "zipCode"];
+      const requiredFields = [
+        "address",
+        "city",
+        "state",
+        "country",
+        "zipCode",
+        "latitude",
+        "longitude",
+      ];
       requiredFields.forEach((field) => {
         if (!stepData[field]) {
           newErrors[field] = "This field is required";
         }
       });
+      if (
+        stepData.latitude &&
+        (isNaN(stepData.latitude) ||
+          stepData.latitude < -90 ||
+          stepData.latitude > 90)
+      ) {
+        newErrors.latitude = "Invalid latitude. Must be between -90 and 90.";
+      }
+      if (
+        stepData.longitude &&
+        (isNaN(stepData.longitude) ||
+          stepData.longitude < -180 ||
+          stepData.longitude > 180)
+      ) {
+        newErrors.longitude =
+          "Invalid longitude. Must be between -180 and 180.";
+      }
     } else if (stepId === "nearBy") {
       if (!stepData.nearbyLocations || stepData.nearbyLocations.length < 2) {
         newErrors.nearbyLocations = "Please add at least 2 nearby locations";
@@ -113,6 +138,8 @@ const Stepper = ({ initialStep = 1 }) => {
           images: formData.gallery?.images || [],
           description: formData.description?.description || "",
           ...formData.location,
+          latitude: parseFloat(formData.location?.latitude),
+          longitude: parseFloat(formData.location?.longitude),
           nearbyLocations: formData.nearBy?.nearbyLocations || [],
         };
         const response = await createListing(listingData);

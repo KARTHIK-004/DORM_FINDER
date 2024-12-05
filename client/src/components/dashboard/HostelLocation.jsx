@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Map from "../Map";
 
-const HostelLocation = ({ updateFormData, formData }) => {
+const HostelLocation = ({ updateFormData, formData, errors, clearError }) => {
   const [localFormData, setLocalFormData] = useState({
     address: formData.address || "",
     city: formData.city || "",
     state: formData.state || "",
     zipCode: formData.zipCode || "",
     country: formData.country || "",
-    latitude: formData.latitude || "41.92747657026781",
-    longitude: formData.longitude || "-74.00669242427526",
+    latitude: formData.latitude || "13.0843",
+    longitude: formData.longitude || "80.2705",
   });
-
-  const mapRef = useRef(null);
-  const markerRef = useRef(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,10 +21,10 @@ const HostelLocation = ({ updateFormData, formData }) => {
       ...prev,
       [name]: value,
     }));
+    clearError(name);
   };
 
-  // Use useMemo to memoize the update effect
-  useMemo(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       updateFormData(localFormData);
     }, 300);
@@ -34,153 +32,120 @@ const HostelLocation = ({ updateFormData, formData }) => {
     return () => clearTimeout(timer);
   }, [localFormData, updateFormData]);
 
-  useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    };
+  const updateMapLocation = () => {
+    // This function is now handled by the Map component
+  };
 
-    window.initMap = () => {
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: {
-          lat: parseFloat(localFormData.latitude),
-          lng: parseFloat(localFormData.longitude),
-        },
-        zoom: 15,
-      });
-
-      markerRef.current = new window.google.maps.Marker({
-        position: {
-          lat: parseFloat(localFormData.latitude),
-          lng: parseFloat(localFormData.longitude),
-        },
-        map: map,
-        draggable: true,
-      });
-
-      window.google.maps.event.addListener(
-        markerRef.current,
-        "dragend",
-        (event) => {
-          const lat = event.latLng.lat();
-          const lng = event.latLng.lng();
-          setLocalFormData((prev) => ({
-            ...prev,
-            latitude: lat.toString(),
-            longitude: lng.toString(),
-          }));
-        }
-      );
-    };
-
-    if (!window.google) {
-      loadGoogleMapsScript();
-    } else {
-      window.initMap();
-    }
+  const mapCenter = useMemo(() => {
+    const lat = parseFloat(localFormData.latitude);
+    const lng = parseFloat(localFormData.longitude);
+    return [lat, lng];
   }, [localFormData.latitude, localFormData.longitude]);
 
-  const updateMapLocation = () => {
-    if (markerRef.current && window.google) {
-      const newPosition = new window.google.maps.LatLng(
-        parseFloat(localFormData.latitude),
-        parseFloat(localFormData.longitude)
-      );
-      markerRef.current.setPosition(newPosition);
-      mapRef.current.panTo(newPosition);
-    }
-  };
+  const popupContent = `${localFormData.address}, ${localFormData.city}, ${localFormData.state}, ${localFormData.country}`;
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Property Location</h2>
       <div>
-        <Label htmlFor="address">Address</Label>
+        <Label htmlFor="hostel-address">Address</Label>
         <Input
-          id="address"
+          id="hostel-address"
           name="address"
           value={localFormData.address}
           onChange={handleInputChange}
           placeholder="Enter street address"
         />
+        {errors.address && (
+          <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+        )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="hostel-city">City</Label>
           <Input
-            id="city"
+            id="hostel-city"
             name="city"
             value={localFormData.city}
             onChange={handleInputChange}
             placeholder="Enter city"
           />
+          {errors.city && (
+            <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+          )}
         </div>
         <div>
-          <Label htmlFor="state">State</Label>
+          <Label htmlFor="hostel-state">State</Label>
           <Input
-            id="state"
+            id="hostel-state"
             name="state"
             value={localFormData.state}
             onChange={handleInputChange}
             placeholder="Enter state"
           />
+          {errors.state && (
+            <p className="text-red-500 text-sm mt-1">{errors.state}</p>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="zipCode">Zip Code</Label>
+          <Label htmlFor="hostel-zip-code">Zip Code</Label>
           <Input
-            id="zipCode"
+            id="hostel-zip-code"
             name="zipCode"
             value={localFormData.zipCode}
             onChange={handleInputChange}
             placeholder="Enter zip code"
           />
+          {errors.zipCode && (
+            <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
+          )}
         </div>
         <div>
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="hostel-country">Country</Label>
           <Input
-            id="country"
+            id="hostel-country"
             name="country"
             value={localFormData.country}
             onChange={handleInputChange}
             placeholder="Enter country"
           />
+          {errors.country && (
+            <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="latitude">Latitude</Label>
+          <Label htmlFor="hostel-latitude">Latitude</Label>
           <Input
-            id="latitude"
+            id="hostel-latitude"
             name="latitude"
             value={localFormData.latitude}
             onChange={handleInputChange}
             placeholder="Enter latitude"
           />
+          {errors.latitude && (
+            <p className="text-red-500 text-sm mt-1">{errors.latitude}</p>
+          )}
         </div>
         <div>
-          <Label htmlFor="longitude">Longitude</Label>
+          <Label htmlFor="hostel-longitude">Longitude</Label>
           <Input
-            id="longitude"
+            id="hostel-longitude"
             name="longitude"
             value={localFormData.longitude}
             onChange={handleInputChange}
             placeholder="Enter longitude"
           />
+          {errors.longitude && (
+            <p className="text-red-500 text-sm mt-1">{errors.longitude}</p>
+          )}
         </div>
       </div>
       <Button onClick={updateMapLocation}>Update Map Location</Button>
-      <div className="mt-6">
-        <div
-          ref={mapRef}
-          className="rounded-lg overflow-hidden border border-border"
-          style={{ width: "100%", height: "450px" }}
-        ></div>
-      </div>
+      <Map center={mapCenter} popupContent={popupContent} />
     </div>
   );
 };
