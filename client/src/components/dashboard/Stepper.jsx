@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { createListing } from "@/utils/api";
 import NearByLocations from "./NearByLocations";
 import HostelLocation from "./HostelLocation";
 import HostelDescription from "./HostelDescription";
@@ -10,7 +11,6 @@ import HostelGallery from "./HostelGallery";
 import HostelAmenities from "./HostelAmenities";
 import HostelDetailsForm from "./HostelDetailsForm";
 import HostelInformationForm from "./HostelInformationForm";
-import { createListing } from "@/utils/api";
 
 const Stepper = ({ initialStep = 1 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -263,7 +263,7 @@ const Stepper = ({ initialStep = 1 }) => {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full mx-auto px-4">
       <div className="relative flex flex-wrap justify-between mb-8">
         {/* Progress Line */}
         <div className="absolute top-5 left-[3%] right-[3%] h-[2px] bg-muted hidden sm:block" />

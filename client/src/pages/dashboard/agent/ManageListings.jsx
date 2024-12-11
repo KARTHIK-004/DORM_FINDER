@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MoreHorizontal, Plus, ArrowUpDown, Loader2 } from "lucide-react";
+import { MoreHorizontal, Plus, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,84 +42,21 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const fetchDashboardData = async () => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  // Simulate API response
-  return {
-    agentName: "John Doe",
-    activeListings: 12,
-    totalStudents: 48,
-    monthlyRevenue: 24500,
-    averageRating: 4.8,
-    listings: [
-      {
-        id: 1,
-        name: "Sunshine Student Living",
-        location: "Central University",
-        price: 599,
-        status: "Active",
-        image: "/Room1.png",
-        occupancy: "85%",
-      },
-      {
-        id: 2,
-        name: "Campus View Residence",
-        location: "University District",
-        price: 699,
-        status: "Active",
-        image: "/Room2.png",
-        occupancy: "92%",
-      },
-      {
-        id: 3,
-        name: "Lakeside Dorms",
-        location: "Lakefront Campus",
-        price: 549,
-        status: "Inactive",
-        image: "/Room3.png",
-        occupancy: "0%",
-      },
-      {
-        id: 4,
-        name: "Downtown Apartments",
-        location: "City Center",
-        price: 799,
-        status: "Maintenance",
-        image: "/Room4.png",
-        occupancy: "50%",
-      },
-    ],
-    recentBookings: [
-      {
-        id: 1,
-        name: "Emma Wilson",
-        property: "Sunshine Student Living",
-        date: "2024-03-15",
-        status: "Confirmed",
-      },
-      {
-        id: 2,
-        name: "James Brown",
-        property: "Campus View Residence",
-        date: "2024-03-14",
-        status: "Pending",
-      },
-      {
-        id: 3,
-        name: "Sophia Lee",
-        property: "Lakeside Dorms",
-        date: "2024-03-13",
-        status: "Confirmed",
-      },
-    ],
-  };
-};
+import { Link } from "react-router-dom";
+import { getListings, updateListing, deleteListing } from "@/utils/api";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export default function ManageListings() {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [listings, setListings] = useState([]);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -127,13 +64,29 @@ export default function ManageListings() {
   const [selectedListing, setSelectedListing] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [listingToDelete, setListingToDelete] = useState(null);
 
   useEffect(() => {
-    fetchDashboardData().then((data) => {
-      setDashboardData(data);
-      setIsLoading(false);
-    });
+    fetchListings();
   }, []);
+
+  const fetchListings = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getListings();
+      console.log("Fetched listings:", data);
+      setListings(data);
+    } catch (error) {
+      console.error("Error fetching listings:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch listings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -144,7 +97,7 @@ export default function ManageListings() {
     }
   };
 
-  const filteredListings = dashboardData?.listings
+  const filteredListings = listings
     .filter((listing) =>
       filterStatus === "all" ? true : listing.status === filterStatus
     )
@@ -161,39 +114,70 @@ export default function ManageListings() {
       return 0;
     });
 
-  const handleEdit = (id) => {
-    toast({
-      title: "Edit Listing",
-      description: `Editing listing with ID: ${id}`,
-    });
-  };
-
-  const handleDelete = (id) => {
-    toast({
-      title: "Delete Listing",
-      description: `Deleting listing with ID: ${id}`,
-      variant: "destructive",
-    });
-  };
-
-  const openDialog = (listing) => {
-    setSelectedListing(listing);
-    setIsDialogOpen(true);
-  };
-
-  const handleStatusChange = (newStatus) => {
-    if (selectedListing) {
-      const updatedListings = dashboardData.listings.map((listing) =>
-        listing.id === selectedListing.id
-          ? { ...listing, status: newStatus }
-          : listing
-      );
-      setDashboardData({ ...dashboardData, listings: updatedListings });
-      setSelectedListing({ ...selectedListing, status: newStatus });
+  const handleEdit = async (id) => {
+    try {
       toast({
-        title: "Status Updated",
-        description: `${selectedListing.name} status changed to ${newStatus}`,
+        title: "Edit Listing",
+        description: `Editing listing with ID: ${id}`,
       });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to edit listing",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!listingToDelete) return;
+
+    try {
+      await deleteListing(listingToDelete.id);
+      setListings(
+        listings.filter((listing) => listing.id !== listingToDelete.id)
+      );
+      toast({
+        title: "Success",
+        description: "Listing has been deleted",
+      });
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.message ||
+          "Failed to delete listing. Please ensure you are logged in.",
+        variant: "destructive",
+      });
+    } finally {
+      setListingToDelete(null);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    if (selectedListing) {
+      try {
+        const updatedListing = await updateListing(selectedListing.id, {
+          status: newStatus,
+        });
+        setListings(
+          listings.map((listing) =>
+            listing.id === selectedListing.id ? updatedListing : listing
+          )
+        );
+        setSelectedListing(updatedListing);
+        toast({
+          title: "Status Updated",
+          description: `${selectedListing.name} status changed to ${newStatus}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update listing status",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -232,21 +216,18 @@ export default function ManageListings() {
           <h1 className="text-3xl font-bold tracking-tight">My Listings</h1>
           <p className="text-muted-foreground">Manage your hostel listings</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add New Listing
-        </Button>
+        <Link to="/agent/manage-listings/create-listings">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Add New Listing
+          </Button>
+        </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Listings"
-          value={dashboardData?.activeListings}
+          value={listings.filter((l) => l.status === "Active").length}
         />
-        <StatCard title="Total Students" value={dashboardData?.totalStudents} />
-        <StatCard
-          title="Monthly Revenue"
-          value={`$${dashboardData?.monthlyRevenue}`}
-        />
-        <StatCard title="Average Rating" value={dashboardData?.averageRating} />
+        <StatCard title="Total Listings" value={listings.length} />
       </div>
 
       <Card>
@@ -315,66 +296,82 @@ export default function ManageListings() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading
-                  ? Array.from({ length: 3 }).map((_, index) => (
-                      <TableRow key={index}>
-                        <TableCell colSpan={6}>
-                          <Skeleton className="h-12 w-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  : filteredListings.map((listing) => (
-                      <TableRow key={listing.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={listing.image}
-                              alt={listing.name}
-                              className="h-10 w-10 rounded-lg object-cover"
-                            />
-                            <span>{listing.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{listing.location}</TableCell>
-                        <TableCell>${listing.price}/month</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={getStatusBadgeVariant(listing.status)}
-                          >
-                            {listing.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{listing.occupancy}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => openDialog(listing)}
-                              >
-                                View details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleEdit(listing.id)}
-                              >
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDelete(listing.id)}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, index) => (
+                    <TableRow key={`skeleton-${index}`}>
+                      <TableCell colSpan={6}>
+                        <Skeleton className="h-12 w-full" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredListings.length > 0 ? (
+                  filteredListings.map((listing) => (
+                    <TableRow key={listing.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={listing.image || "/placeholder.svg"}
+                            alt={listing.name}
+                            className="h-10 w-10 rounded-lg object-cover"
+                          />
+                          <span>{listing.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{listing.location}</TableCell>
+                      <TableCell>${listing.price}/month</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(listing.status)}>
+                          {listing.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{listing.occupancy}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (listing._id) {
+                                  window.location.href = `/listings/${listing._id}`;
+                                } else {
+                                  toast({
+                                    title: "Error",
+                                    description: "Invalid listing ID",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              View details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(listing.id)}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setListingToDelete(listing)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-4">
+                      No listings found
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -420,12 +417,27 @@ export default function ManageListings() {
                   </span>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="font-medium">Image:</span>
-                  <img
-                    src={selectedListing.image}
-                    alt={selectedListing.name}
-                    className="col-span-3 rounded-md"
-                  />
+                  <span className="font-medium">Property Type:</span>
+                  <span className="col-span-3">
+                    {selectedListing.propertyType}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <span className="font-medium">Room Type:</span>
+                  <span className="col-span-3">{selectedListing.roomType}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <span className="font-medium">Amenities:</span>
+                  <div className="col-span-3">
+                    {Object.entries(selectedListing.amenities).map(
+                      ([key, value]) =>
+                        value && (
+                          <Badge key={key} className="mr-2 mb-2">
+                            {key}
+                          </Badge>
+                        )
+                    )}
+                  </div>
                 </div>
               </div>
               <DialogFooter>
@@ -435,6 +447,24 @@ export default function ManageListings() {
           )}
         </DialogContent>
       </Dialog>
+      <AlertDialog
+        open={!!listingToDelete}
+        onOpenChange={() => setListingToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              listing and remove the data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -4,8 +4,6 @@ const api = axios.create({
   baseURL: "/api",
   withCredentials: true,
 });
-
-// Add a request interceptor to include the token in the header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -87,9 +85,10 @@ export const createListing = async (listingData) => {
 export const getListings = async () => {
   try {
     const response = await api.get("/listings");
-    return response.data;
+    return Array.isArray(response.data) ? response.data : [];
   } catch (error) {
-    throw error.response ? error.response.data : error.message;
+    console.error("Error fetching listings:", error);
+    return [];
   }
 };
 

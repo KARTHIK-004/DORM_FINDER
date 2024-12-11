@@ -161,7 +161,7 @@ export function Navbar() {
       {isAuthenticated && user && (
         <NavigationMenuItem>
           <Link
-            to={`/dashboard/${user.userType}`}
+            to={`/${user.userType}`}
             className={navigationMenuTriggerStyle()}
           >
             Dashboard
@@ -206,10 +206,7 @@ export function Navbar() {
                 Contact
               </Link>
               {isAuthenticated && user && (
-                <Link
-                  to={`/dashboard/${user.userType}`}
-                  className="text-sm font-medium"
-                >
+                <Link to={`/${user.userType}`} className="text-sm font-medium">
                   Dashboard
                 </Link>
               )}
@@ -260,7 +257,7 @@ export function Navbar() {
                   <Link to="/profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link to={`/dashboard/${user.userType}`}>Dashboard</Link>
+                  <Link to={`/${user.userType}`}>Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link to="/favorites">Favorites</Link>

@@ -26,14 +26,20 @@ export const createListing = async (req, res) => {
 export const getListings = async (req, res) => {
   try {
     const listings = await Listing.find();
-    res.status(200).json({
-      status: "success",
-      results: listings.length,
-      data: {
-        listings,
-      },
-    });
+    const mappedListings = listings.map((l) => ({
+      id: l._id,
+      name: l.propertyName,
+      location: `${l.city}, ${l.state}`,
+      price: l.price,
+      status: "Active",
+      occupancy: l.capacity,
+      propertyType: l.propertyType,
+      roomType: l.roomType,
+      amenities: l.amenities,
+    }));
+    res.status(200).json(mappedListings);
   } catch (error) {
+    console.error("Error fetching listings:", error);
     res.status(400).json({
       status: "fail",
       message: error.message,
@@ -43,8 +49,20 @@ export const getListings = async (req, res) => {
 
 export const getListing = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const listing = await Listing.findById(req.params.id).select({
+      _id: 1,
+      propertyName: 1,
+      city: 1,
+      state: 1,
+      price: 1,
+      capacity: 1,
+      propertyType: 1,
+      roomType: 1,
+      amenities: 1,
+    });
+
     if (!listing) {
+      console.log(`No listing found with id: ${req.params.id}`);
       return res.status(404).json({
         status: "fail",
         message: "Listing not found",
@@ -57,6 +75,7 @@ export const getListing = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(`Error fetching listing with id ${req.params.id}:`, error);
     res.status(400).json({
       status: "fail",
       message: error.message,
@@ -70,12 +89,14 @@ export const updateListing = async (req, res) => {
       new: true,
       runValidators: true,
     });
+
     if (!listing) {
       return res.status(404).json({
         status: "fail",
-        message: "Listing not found",
+        message: "No listing found with that ID",
       });
     }
+
     res.status(200).json({
       status: "success",
       data: {
@@ -85,7 +106,7 @@ export const updateListing = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      message: error.message,
+      message: error,
     });
   }
 };
@@ -93,12 +114,14 @@ export const updateListing = async (req, res) => {
 export const deleteListing = async (req, res) => {
   try {
     const listing = await Listing.findByIdAndDelete(req.params.id);
+
     if (!listing) {
       return res.status(404).json({
         status: "fail",
-        message: "Listing not found",
+        message: "No listing found with that ID",
       });
     }
+
     res.status(204).json({
       status: "success",
       data: null,
@@ -106,7 +129,7 @@ export const deleteListing = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      message: error.message,
+      message: error,
     });
   }
 };

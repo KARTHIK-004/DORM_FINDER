@@ -85,7 +85,7 @@ export default function AgentDashboard() {
           </p>
         </div>
         <Button asChild size="lg" className="gap-2">
-          <Link to="/dashboard/agent/create-listing">
+          <Link to="/agent/create-listing">
             <Plus className="h-5 w-5" />
             Add New Listing
           </Link>
@@ -137,7 +137,7 @@ export default function AgentDashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Your Listings</CardTitle>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/dashboard/agent/listings">
+              <Link to="/agent/listings">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -196,7 +196,7 @@ export default function AgentDashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Bookings</CardTitle>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/dashboard/agent/bookings">
+              <Link to="/agent/bookings">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

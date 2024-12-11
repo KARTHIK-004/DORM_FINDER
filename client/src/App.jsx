@@ -13,6 +13,7 @@ import Bookings from "./pages/dashboard/agent/AgentBooking";
 import Reviews from "./pages/dashboard/agent/Reviews";
 import ManageListings from "./pages/dashboard/agent/ManageListings";
 import CreateListings from "./pages/dashboard/agent/CreateListings";
+import ViewListing from "./pages/dashboard/agent/ViewListing";
 
 function App() {
   return (
@@ -24,12 +25,17 @@ function App() {
         {/* Protected routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
-          <Route path="/agent/dashboard" element={<AgentDashboard />}>
+          <Route path="/agent" element={<AgentDashboard />}>
             {/* Nested Routes */}
             <Route index element={<Dashboard />} />
             <Route path="profile" element={<AgentProfile />} />
-            <Route path="create-listings" element={<CreateListings />} />
+            <Route
+              path="manage-listings/create-listings"
+              element={<CreateListings />}
+            />
             <Route path="manage-listings" element={<ManageListings />} />
+            <Route path="listings/:id" element={<ViewListing />} />
+            <Route path="view-listings" element={<ViewListing />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="reviews" element={<Reviews />} />
           </Route>

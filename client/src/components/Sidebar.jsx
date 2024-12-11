@@ -42,7 +42,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { logout } from "@/utils/api";
 
-export default function Sidebar({ userRole, isOpen, onToggle }) {
+const Sidebar = ({ userRole, isOpen, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("");
@@ -117,24 +117,19 @@ export default function Sidebar({ userRole, isOpen, onToggle }) {
 
       case "agent":
         return [
-          { name: "Dashboard", icon: Home, path: "/agent/dashboard" },
-          { name: "Profile", icon: User, path: "/agent/dashboard/profile" },
-          {
-            name: "Add New Hostel",
-            icon: FilePlus,
-            path: "/agent/dashboard/create-listings",
-          },
+          { name: "Dashboard", icon: Home, path: "/agent" },
+          { name: "Profile", icon: User, path: "/agent/profile" },
           {
             name: "Manage Listings",
             icon: List,
-            path: "/agent/dashboard/manage-listings",
+            path: "/agent/manage-listings",
           },
           {
             name: "Bookings",
             icon: Calendar,
-            path: "/agent/dashboard/bookings",
+            path: "/agent/bookings",
           },
-          { name: "Reviews", icon: Star, path: "/agent/dashboard/reviews" },
+          { name: "Reviews", icon: Star, path: "/agent/reviews" },
         ];
 
       case "admin":
@@ -205,17 +200,18 @@ export default function Sidebar({ userRole, isOpen, onToggle }) {
                 <TooltipTrigger asChild>
                   <Button
                     variant={
-                      activeTab === item.name.toLowerCase()
+                      activeTab === item.path.split("/").pop()
                         ? "secondary"
                         : "ghost"
                     }
                     className={`w-full justify-start ${
-                      activeTab === item.name.toLowerCase()
+                      activeTab === item.path.split("/").pop()
                         ? "bg-primary text-primary-foreground"
                         : ""
                     }`}
                     onClick={() => {
                       navigate(item.path);
+                      setActiveTab(item.path.split("/").pop());
                       if (isMobileView) onToggle();
                     }}
                   >
@@ -300,4 +296,6 @@ export default function Sidebar({ userRole, isOpen, onToggle }) {
       <SidebarContent />
     </aside>
   );
-}
+};
+
+export default Sidebar;
